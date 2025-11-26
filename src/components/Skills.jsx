@@ -43,10 +43,14 @@ const Skills = () => {
     engine.world.gravity.y = 0;
     engine.world.gravity.x = 0;
 
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
+    let width = containerRef.current.clientWidth;
+    let height = containerRef.current.clientHeight;
+    
+    // Dynamic Ball Size
+    const isMobile = window.innerWidth < 768;
+    const radius = isMobile ? 30 : 60; // 30 for mobile, 60 for desktop
 
-    // Create Renderer (Invisible, just for mouse interaction mostly)
+    // Create Renderer
     const render = Render.create({
       element: containerRef.current,
       canvas: canvasRef.current,
@@ -66,29 +70,33 @@ const Skills = () => {
       render: { visible: false },
       restitution: 0.8 
     };
-    const walls = [
-      Bodies.rectangle(width / 2, -50, width, 100, wallOptions), // Top
-      Bodies.rectangle(width / 2, height + 50, width, 100, wallOptions), // Bottom
-      Bodies.rectangle(width + 50, height / 2, 100, height, wallOptions), // Right
-      Bodies.rectangle(-50, height / 2, 100, height, wallOptions) // Left
+    
+    // Helper to create walls
+    const createWalls = (w, h) => [
+      Bodies.rectangle(w / 2, -50, w, 100, wallOptions), // Top
+      Bodies.rectangle(w / 2, h + 50, w, 100, wallOptions), // Bottom
+      Bodies.rectangle(w + 50, h / 2, 100, h, wallOptions), // Right
+      Bodies.rectangle(-50, h / 2, 100, h, wallOptions) // Left
     ];
+
+    let walls = createWalls(width, height);
     World.add(world, walls);
 
     // Create Skill Bubbles
     const bubbles = skillsData.map((skill, index) => {
-      const radius = 60; // Bubble radius
-      const x = Math.random() * (width - radius * 2) + radius;
-      const y = Math.random() * (height - radius * 2) + radius;
+      // Ensure spawn is within the current visible window width for mobile safety
+      const spawnWidth = Math.min(width, window.innerWidth);
+      const x = Math.random() * (spawnWidth - radius * 2 - 20) + radius + 10;
+      const y = Math.random() * (height - radius * 2 - 20) + radius + 10;
       
       const body = Bodies.circle(x, y, radius, {
-        restitution: 0.9, // Bouncy
+        restitution: 0.9,
         friction: 0.005,
-        frictionAir: 0.02, // Air resistance to slow down eventually
+        frictionAir: 0.02,
         density: 0.04,
-        render: { visible: false } // We render via React
+        render: { visible: false }
       });
 
-      // Add initial random velocity
       Matter.Body.setVelocity(body, {
         x: (Math.random() - 0.5) * 5,
         y: (Math.random() - 0.5) * 5
@@ -105,21 +113,46 @@ const Skills = () => {
       mouse: mouse,
       constraint: {
         stiffness: 0.2,
-        render: {
-          visible: false
-        }
+        render: { visible: false }
       }
     });
 
     World.add(world, mouseConstraint);
-
-    // Keep the mouse in sync with rendering
     render.mouse = mouse;
 
     // Run the engine
     const runner = Runner.create();
     Runner.run(runner, engine);
     Render.run(render);
+
+    // Resize Handler
+    const handleResize = () => {
+      const newWidth = containerRef.current.clientWidth;
+      const newHeight = containerRef.current.clientHeight;
+      
+      // Update render bounds
+      render.canvas.width = newWidth;
+      render.canvas.height = newHeight;
+      
+      // Remove old walls and add new ones
+      World.remove(world, walls);
+      walls = createWalls(newWidth, newHeight);
+      World.add(world, walls);
+      
+      // Push escaped balls back
+      bubbles.forEach(({ body }) => {
+        if (body.position.x > newWidth) {
+          Matter.Body.setPosition(body, { x: newWidth - 50, y: body.position.y });
+          Matter.Body.setVelocity(body, { x: -2, y: body.velocity.y });
+        }
+        if (body.position.y > newHeight) {
+          Matter.Body.setPosition(body, { x: body.position.x, y: newHeight - 50 });
+          Matter.Body.setVelocity(body, { x: body.velocity.x, y: -2 });
+        }
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
 
     // Sync Loop
     let animationFrameId;
@@ -129,8 +162,11 @@ const Skills = () => {
         if (bubbleEl) {
           const { x, y } = body.position;
           const angle = body.angle;
-          // Sync DOM position
-          bubbleEl.style.transform = `translate(${x - 60}px, ${y - 60}px) rotate(${angle}rad)`;
+          // Sync DOM position with dynamic offset
+          // Note: We use the radius from the closure (initial render). 
+          // If dynamic resizing of balls is needed on window resize, that requires more complex state.
+          // For now, we assume mobile/desktop state doesn't flip constantly.
+          bubbleEl.style.transform = `translate(${x - radius}px, ${y - radius}px) rotate(${angle}rad)`;
         }
       });
       animationFrameId = requestAnimationFrame(updateLoop);
@@ -139,6 +175,7 @@ const Skills = () => {
 
     // Cleanup
     return () => {
+      window.removeEventListener('resize', handleResize);
       Render.stop(render);
       Runner.stop(runner);
       cancelAnimationFrame(animationFrameId);
@@ -151,10 +188,14 @@ const Skills = () => {
     };
   }, []);
 
+  // Calculate size for JSX rendering
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+  const bubbleSize = isMobile ? 60 : 120; // Diameter
+
   return (
-    <section id="skills" className="min-h-screen w-full bg-transparent relative flex flex-col items-center justify-center overflow-hidden py-20">
+    <section id="skills" className="min-h-screen w-full bg-transparent relative flex flex-col items-center justify-center overflow-hidden py-20 mt-32 md:mt-0">
       <div className="text-center mb-10 z-10 pointer-events-none">
-        <h2 className="text-5xl md:text-7xl font-bold text-white font-comic mb-4">Tech Stack</h2>
+        <h2 className="text-5xl md:text-7xl font-bold text-white font-sans mb-4">Tech Stack</h2>
         <p className="text-xl text-blue-400 font-light">Zero-Gravity Arsenal</p>
       </div>
 
@@ -173,12 +214,16 @@ const Skills = () => {
           <div
             key={index}
             ref={el => bubbleRefs.current[index] = el}
-            className="absolute top-0 left-0 w-[120px] h-[120px] rounded-full flex flex-col items-center justify-center pointer-events-none z-20 group"
-            style={{ willChange: 'transform' }}
+            className="absolute top-0 left-0 rounded-full flex flex-col items-center justify-center pointer-events-none z-20 group"
+            style={{ 
+              willChange: 'transform',
+              width: `${bubbleSize}px`,
+              height: `${bubbleSize}px`
+            }}
           >
             {/* Glass Bubble Visual */}
             <div className={`w-full h-full rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center justify-center transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110 group-hover:shadow-[0_0_30px_${skill.color}]`}>
-              <skill.icon className="text-5xl text-white drop-shadow-lg transition-colors duration-300" style={{ color: skill.color }} />
+              <skill.icon className={`${isMobile ? 'text-2xl' : 'text-5xl'} text-white drop-shadow-lg transition-colors duration-300`} style={{ color: skill.color }} />
             </div>
             
             {/* Tooltip/Label */}

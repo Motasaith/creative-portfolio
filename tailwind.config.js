@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        'sans': ['"Space Grotesk"', 'sans-serif'],
         'comic': ['"Comic Sans MS"', 'cursive', 'sans-serif'],
       },
       colors: {

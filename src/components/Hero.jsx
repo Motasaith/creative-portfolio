@@ -4,7 +4,7 @@ import HeroImage from './HeroImage';
 
 const Hero = () => {
   return (
-    <section id="home" className="min-h-screen flex flex-col md:flex-row items-center justify-center p-8 md:p-20 bg-transparent text-white overflow-hidden relative">
+    <section id="home" className="min-h-screen flex flex-col md:flex-row items-center justify-center p-8 md:p-20 pt-40 md:pt-20 bg-transparent text-white overflow-hidden relative">
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute top-10 left-10 w-64 h-64 bg-navy-dark rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -19,7 +19,7 @@ const Hero = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="md:w-1/2 text-center md:text-left mb-10 md:mb-0"
         >
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 font-comic tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 font-sans tracking-tight">
             Hi, I'm <span className="text-blue-400">Abdul Rauf</span>
           </h1>
           <h2 className="text-2xl md:text-4xl text-gray-300 mb-6 font-light">
