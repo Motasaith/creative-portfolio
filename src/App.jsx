@@ -11,8 +11,13 @@ import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 
 import { Toaster } from 'react-hot-toast';
+import { AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import Preloader from './components/Preloader';
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <div className="min-h-screen text-white font-comic selection:bg-blue-500 selection:text-white relative">
       <Toaster
@@ -31,6 +36,11 @@ function App() {
           },
         }}
       />
+      
+      <AnimatePresence mode='wait'>
+        {isLoading && <Preloader onComplete={() => setIsLoading(false)} />}
+      </AnimatePresence>
+
       <StarfieldBackground />
       <Header />
       <Sidebar />

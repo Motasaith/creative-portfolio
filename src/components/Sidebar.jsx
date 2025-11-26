@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 
 const Sidebar = () => {
   const links = [
-    { icon: <Github size={24} />, href: "https://github.com", label: "GitHub" },
-    { icon: <Linkedin size={24} />, href: "https://linkedin.com", label: "LinkedIn" },
-    { icon: <Container size={24} />, href: "https://docker.com", label: "Docker" },
+    { icon: <Github size={24} />, href: "https://github.com/Motasaith", label: "GitHub" },
+    { icon: <Linkedin size={24} />, href: "https://www.linkedin.com/in/abdul-rauf-azhar-5750a3378/", label: "LinkedIn" },
+    { icon: <Container size={24} />, href: "https://hub.docker.com/u/abdulraufazhar?_gl=1*1rrojn1*_gcl_au*MzUxMTEwMjUyLjE3NjI5NjQ3MzY.*_ga*NTc4Njk1NjU2LjE3NjI5NjQ3Mzc.*_ga_XJWPQMJYHQ*czE3NjQxNzQyNjckbzkkZzAkdDE3NjQxNzQyNjckajYwJGwwJGgw", label: "Docker" },
   ];
 
   return (
