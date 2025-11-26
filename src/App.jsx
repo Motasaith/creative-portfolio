@@ -10,9 +10,27 @@ import About from './components/About';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <div className="min-h-screen text-white font-comic selection:bg-blue-500 selection:text-white relative">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1e1e2e',
+            color: '#fff',
+            border: '1px solid #3b82f6',
+          },
+          success: {
+            iconTheme: {
+              primary: '#06b6d4',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <StarfieldBackground />
       <Header />
       <Sidebar />

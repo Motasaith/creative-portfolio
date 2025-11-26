@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import { FaRocket } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 const Contact = () => {
   const formRef = useRef();
@@ -11,7 +12,6 @@ const Contact = () => {
     message: '',
   });
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(''); // 'success' | 'error' | ''
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,24 +21,25 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
+    const loadingToast = toast.loading("Transmitting signal...");
 
-    // Replace with your actual Service ID, Template ID, and Public Key
-    // emailjs.send('service_id', 'template_id', {
-    //   from_name: form.name,
-    //   to_name: "Dev",
-    //   from_email: form.email,
-    //   to_email: "contact@example.com",
-    //   message: form.message,
-    // }, 'public_key')
-
-    // Mocking the request for now
-    setTimeout(() => {
+    emailjs.sendForm(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      formRef.current,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    )
+    .then((result) => {
       setLoading(false);
-      setStatus('success');
+      toast.dismiss(loadingToast);
+      toast.success("Signal Transmitted Successfully! 🚀");
       setForm({ name: '', email: '', message: '' });
-      
-      setTimeout(() => setStatus(''), 5000);
-    }, 2000);
+    }, (error) => {
+      setLoading(false);
+      toast.dismiss(loadingToast);
+      console.error('EmailJS Error:', error);
+      toast.error("Transmission Failed. Check your connection.");
+    });
   };
 
   return (
@@ -145,36 +146,17 @@ const Contact = () => {
 
               <div className="flex justify-between items-center pt-6">
                 <AnimatePresence mode='wait'>
-                  {status === 'success' ? (
-                    <motion.div
-                      key="success"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="flex items-center gap-2 text-green-400 text-lg font-bold"
-                    >
-                      <span>Transmission Successful</span>
-                      <motion.div
-                        initial={{ x: 0, y: 0 }}
-                        animate={{ x: 100, y: -100, opacity: 0 }}
-                        transition={{ duration: 1, ease: "easeIn" }}
-                      >
-                        <FaRocket />
-                      </motion.div>
-                    </motion.div>
-                  ) : (
-                    <motion.button
-                      key="submit"
-                      type="submit"
-                      disabled={loading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-8 py-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/50 rounded hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 group uppercase tracking-wider text-sm font-bold"
-                    >
-                      {loading ? 'Transmitting...' : 'Transmit Signal'}
-                      {!loading && <FaRocket className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />}
-                    </motion.button>
-                  )}
+                  <motion.button
+                    key="submit"
+                    type="submit"
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-8 py-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/50 rounded hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 group uppercase tracking-wider text-sm font-bold"
+                  >
+                    {loading ? 'Transmitting...' : 'Transmit Signal'}
+                    {!loading && <FaRocket className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />}
+                  </motion.button>
                 </AnimatePresence>
               </div>
             </form>
