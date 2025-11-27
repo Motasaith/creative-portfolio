@@ -14,7 +14,7 @@ const About = () => {
           viewport={{ once: true }}
           className="md:w-1/2"
         >
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white font-comic">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
             About <span className="text-blue-500">Me</span>
           </h2>
           <p className="text-gray-300 text-lg leading-relaxed mb-6">

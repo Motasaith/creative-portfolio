@@ -8,7 +8,7 @@ const Footer = () => {
         
         {/* Left: Logo & Copyright */}
         <div className="md:w-1/3">
-          <div className="text-2xl font-bold font-comic text-white tracking-tighter mb-4">
+          <div className="text-2xl font-bold text-white tracking-tighter mb-4">
             Abdul Rauf <span className="text-blue-500">Azhar</span>
           </div>
           <p className="text-gray-400 text-sm leading-relaxed">

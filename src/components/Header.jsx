@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Share2, Github, Linkedin, Mail } from 'lucide-react';
+import { Menu, X, Share2, Github, Linkedin, Container } from 'lucide-react';
 
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = React.useState(false);
@@ -33,7 +33,7 @@ const Header = () => {
         transition={{ duration: 0.8 }}
         className="fixed top-0 left-0 w-full z-50 px-6 md:pl-24 py-4 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm pointer-events-none md:pointer-events-auto"
       >
-        <div className="text-xl md:text-2xl font-bold font-comic text-white tracking-tighter cursor-pointer pointer-events-auto md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <div className="text-xl md:text-2xl font-bold text-white tracking-tighter cursor-pointer pointer-events-auto md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           Abdul Rauf <span className="text-blue-500">Azhar</span>
         </div>
 
@@ -58,7 +58,7 @@ const Header = () => {
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed top-5 left-5 z-[60] md:hidden w-12 h-12 rounded-full bg-slate-900/50 backdrop-blur border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+        className="fixed top-5 left-5 z-[60] md:hidden w-10 h-10 p-2 rounded-full bg-slate-900/50 backdrop-blur border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
         onClick={toggleSocial}
       >
         <Share2 size={20} />
@@ -68,10 +68,10 @@ const Header = () => {
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed top-5 right-5 z-[60] md:hidden w-12 h-12 rounded-full bg-slate-900/50 backdrop-blur border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+        className="fixed top-5 right-5 z-[60] md:hidden w-10 h-10 p-2 rounded-full bg-slate-900/50 backdrop-blur border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
         onClick={toggleNav}
       >
-        <Menu size={24} />
+        <Menu size={20} />
       </motion.button>
 
       {/* LEFT PANEL - COMMS (Socials) */}
@@ -92,23 +92,23 @@ const Header = () => {
             </div>
 
             <div className="flex flex-col gap-6">
-              <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-gray-300 hover:text-cyan-400 transition-colors group">
+              <a href="https://github.com/Motasaith" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-gray-300 hover:text-cyan-400 transition-colors group">
                 <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 group-hover:border-cyan-500/50 transition-colors">
                   <Github size={20} />
                 </div>
                 <span className="font-medium">GitHub</span>
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-gray-300 hover:text-cyan-400 transition-colors group">
+              <a href="https://www.linkedin.com/in/abdul-rauf-azhar-5750a3378/" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-gray-300 hover:text-cyan-400 transition-colors group">
                 <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 group-hover:border-cyan-500/50 transition-colors">
                   <Linkedin size={20} />
                 </div>
                 <span className="font-medium">LinkedIn</span>
               </a>
-              <a href="mailto:contact@example.com" className="flex items-center gap-4 text-gray-300 hover:text-cyan-400 transition-colors group">
+              <a href="https://hub.docker.com/u/abdulraufazhar?_gl=1*1rrojn1*_gcl_au*MzUxMTEwMjUyLjE3NjI5NjQ3MzY.*_ga*NTc4Njk1NjU2LjE3NjI5NjQ3Mzc.*_ga_XJWPQMJYHQ*czE3NjQxNzQyNjckbzkkZzAkdDE3NjQxNzQyNjckajYwJGwwJGgw" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-gray-300 hover:text-cyan-400 transition-colors group">
                 <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 group-hover:border-cyan-500/50 transition-colors">
-                  <Mail size={20} />
+                  <Container size={20} />
                 </div>
-                <span className="font-medium">Email</span>
+                <span className="font-medium">Docker</span>
               </a>
             </div>
 

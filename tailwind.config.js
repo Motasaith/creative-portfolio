@@ -8,7 +8,6 @@ export default {
     extend: {
       fontFamily: {
         'sans': ['"Space Grotesk"', 'sans-serif'],
-        'comic': ['"Comic Sans MS"', 'cursive', 'sans-serif'],
       },
       colors: {
         'charcoal': '#1a1a1a',

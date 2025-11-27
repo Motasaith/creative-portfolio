@@ -19,7 +19,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <div className="min-h-screen text-white font-comic selection:bg-blue-500 selection:text-white relative">
+    <div className="min-h-screen text-white tracking-tight selection:bg-blue-500 selection:text-white relative">
       <Toaster
         position="top-right"
         toastOptions={{
