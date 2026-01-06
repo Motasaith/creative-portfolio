@@ -19,14 +19,27 @@ const skillsData = [
 const Skills = () => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const [constraints, setConstraints] = useState(null);
-  const [scene, setScene] = useState(null);
-  
-  // Refs for managing DOM elements sync
   const bubbleRefs = useRef([]);
+  // Use state to track mobile status to trigger re-init on breakpoint change
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResizeCheck = () => {
+      const mobile = window.innerWidth < 768;
+      if (mobile !== isMobile) {
+        setIsMobile(mobile);
+      }
+    };
+    
+    window.addEventListener('resize', handleResizeCheck);
+    return () => window.removeEventListener('resize', handleResizeCheck);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!containerRef.current || !canvasRef.current) return;
+
+    // Wait for container to have dimensions
+    if (containerRef.current.clientWidth === 0) return;
 
     const Engine = Matter.Engine,
           Render = Matter.Render,
@@ -46,9 +59,9 @@ const Skills = () => {
     let width = containerRef.current.clientWidth;
     let height = containerRef.current.clientHeight;
     
-    // Dynamic Ball Size
-    const isMobile = window.innerWidth < 768;
-    const radius = isMobile ? 30 : 60; // 30 for mobile, 60 for desktop
+    // Dynamic Ball Size based on current isMobile state
+    const radius = isMobile ? 30 : 50; 
+    const bubbleDiameter = radius * 2;
 
     // Create Renderer
     const render = Render.create({
@@ -60,7 +73,7 @@ const Skills = () => {
         height,
         background: 'transparent',
         wireframes: false,
-        showAngleIndicator: false
+        showAngleIndicator: false,
       }
     });
 
@@ -71,7 +84,6 @@ const Skills = () => {
       restitution: 0.8 
     };
     
-    // Helper to create walls
     const createWalls = (w, h) => [
       Bodies.rectangle(w / 2, -50, w, 100, wallOptions), // Top
       Bodies.rectangle(w / 2, h + 50, w, 100, wallOptions), // Bottom
@@ -83,11 +95,15 @@ const Skills = () => {
     World.add(world, walls);
 
     // Create Skill Bubbles
+    // Use a grid-like or spread out spawn to avoid initial overlapping
     const bubbles = skillsData.map((skill, index) => {
-      // Ensure spawn is within the current visible window width for mobile safety
-      const spawnWidth = Math.min(width, window.innerWidth);
-      const x = Math.random() * (spawnWidth - radius * 2 - 20) + radius + 10;
-      const y = Math.random() * (height - radius * 2 - 20) + radius + 10;
+      // safe spawn area
+      const padding = radius + 20;
+      const safeWidth = width - padding * 2;
+      const safeHeight = height - padding * 2;
+      
+      const x = Math.random() * safeWidth + padding;
+      const y = Math.random() * safeHeight + padding;
       
       const body = Bodies.circle(x, y, radius, {
         restitution: 0.9,
@@ -109,6 +125,10 @@ const Skills = () => {
 
     // Mouse Control
     const mouse = Mouse.create(render.canvas);
+    // Remove scroll-wheel capture
+    mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
+    mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
+
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse: mouse,
       constraint: {
@@ -125,34 +145,21 @@ const Skills = () => {
     Runner.run(runner, engine);
     Render.run(render);
 
-    // Resize Handler
-    const handleResize = () => {
+    // Resize Handler for canvas only (not re-init)
+    const handleCanvasResize = () => {
+      if (!containerRef.current) return;
       const newWidth = containerRef.current.clientWidth;
       const newHeight = containerRef.current.clientHeight;
       
-      // Update render bounds
       render.canvas.width = newWidth;
       render.canvas.height = newHeight;
       
-      // Remove old walls and add new ones
       World.remove(world, walls);
       walls = createWalls(newWidth, newHeight);
       World.add(world, walls);
-      
-      // Push escaped balls back
-      bubbles.forEach(({ body }) => {
-        if (body.position.x > newWidth) {
-          Matter.Body.setPosition(body, { x: newWidth - 50, y: body.position.y });
-          Matter.Body.setVelocity(body, { x: -2, y: body.velocity.y });
-        }
-        if (body.position.y > newHeight) {
-          Matter.Body.setPosition(body, { x: body.position.x, y: newHeight - 50 });
-          Matter.Body.setVelocity(body, { x: body.velocity.x, y: -2 });
-        }
-      });
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleCanvasResize);
 
     // Sync Loop
     let animationFrameId;
@@ -161,12 +168,10 @@ const Skills = () => {
         const bubbleEl = bubbleRefs.current[index];
         if (bubbleEl) {
           const { x, y } = body.position;
-          const angle = body.angle;
-          // Sync DOM position with dynamic offset
-          // Note: We use the radius from the closure (initial render). 
-          // If dynamic resizing of balls is needed on window resize, that requires more complex state.
-          // For now, we assume mobile/desktop state doesn't flip constantly.
-          bubbleEl.style.transform = `translate(${x - radius}px, ${y - radius}px) rotate(${angle}rad)`;
+          // Keep bubbles inside bounds visually
+          // (Physics handles it mostly, but this prevents glitching out)
+          
+          bubbleEl.style.transform = `translate(${x - radius}px, ${y - radius}px)`;
         }
       });
       animationFrameId = requestAnimationFrame(updateLoop);
@@ -175,22 +180,20 @@ const Skills = () => {
 
     // Cleanup
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', handleCanvasResize);
       Render.stop(render);
       Runner.stop(runner);
       cancelAnimationFrame(animationFrameId);
       World.clear(world);
       Engine.clear(engine);
-      render.canvas.remove();
+      if (render.canvas) render.canvas.remove();
       render.canvas = null;
       render.context = null;
       render.textures = {};
     };
-  }, []);
+  }, [isMobile]); // Re-run when switching mobile/desktop
 
-  // Calculate size for JSX rendering
-  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
-  const bubbleSize = isMobile ? 60 : 120; // Diameter
+  const bubbleDiameter = isMobile ? 60 : 100; // Match radius * 2
 
   return (
     <section id="skills" className="min-h-screen w-full bg-transparent relative flex flex-col items-center justify-center overflow-hidden py-20 mt-32 md:mt-0">
@@ -217,8 +220,8 @@ const Skills = () => {
             className="absolute top-0 left-0 rounded-full flex flex-col items-center justify-center pointer-events-none z-20 group"
             style={{ 
               willChange: 'transform',
-              width: `${bubbleSize}px`,
-              height: `${bubbleSize}px`
+              width: `${bubbleDiameter}px`,
+              height: `${bubbleDiameter}px`
             }}
           >
             {/* Glass Bubble Visual */}
@@ -227,7 +230,7 @@ const Skills = () => {
             </div>
             
             {/* Tooltip/Label */}
-            <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
+            <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center pointer-events-auto">
               <span className="text-white font-bold text-sm bg-black/50 px-2 py-1 rounded-md backdrop-blur-sm border border-white/10">
                 {skill.name}
               </span>
